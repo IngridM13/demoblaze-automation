@@ -59,4 +59,8 @@ export class HomePage {
   async isNextButtonVisible(): Promise<boolean> {
     return this.nextButton.isVisible();
   }
+
+  async selectProduct(name: string): Promise<void> {
+    await this.page.locator('#tbodyid').getByRole('link', { name, exact: true }).click();
+  }
 }
