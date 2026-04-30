@@ -1,0 +1,22 @@
+{
+  "name": "ui-automation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test:staging": "ENV=staging npx playwright test",
+    "test:production": "ENV=production npx playwright test",
+    "test:staging:headed": "ENV=staging npx playwright test --headed",
+    "test:production:headed": "ENV=production npx playwright test --headed",
+    "test:report": "npx playwright show-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "dotenv": "^17.4.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}

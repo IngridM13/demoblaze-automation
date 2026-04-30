@@ -1,0 +1,31 @@
+import { defineConfig, devices } from '@playwright/test';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+const env = process.env.ENV || 'staging';
+dotenv.config({ path: path.resolve(__dirname, `.env.${env}`) });
+
+export default defineConfig({
+  testDir: './tests',
+  timeout: 30_000,
+  expect: {
+    timeout: 10_000,
+  },
+  fullyParallel: false,
+  retries: 1,
+  reporter: [['list'], ['html', { open: 'never' }]],
+
+  use: {
+    baseURL: process.env.BASE_URL,
+    headless: true,
+    screenshot: 'only-on-failure',
+    trace: 'on-first-retry',
+  },
+
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+});
