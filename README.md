@@ -63,17 +63,18 @@ npx playwright install chromium
 
 ## Environment Configuration
 
-The project supports **staging** and **production** environments. Environment variables are loaded automatically from the corresponding `.env` file based on the `ENV` variable passed at runtime.
+The project supports **staging** and **production** environments. Each has its own `.env` file holding the `BASE_URL` and any other environment-specific values.
 
-**Step 1 — Create your environment files:**
+### Setup
+
+**Step 1 — Create your environment files from the provided templates:**
 
 ```bash
-# Copy the example templates
 cp .env.staging.example .env.staging
 cp .env.production.example .env.production
 ```
 
-**Step 2 — Fill in your values:**
+**Step 2 — Fill in the values for each file:**
 
 `.env.staging`
 ```env
@@ -89,11 +90,39 @@ ENV=production
 
 > **Note:** `.env.staging` and `.env.production` are listed in `.gitignore` and will never be committed. Only the `.example` template files are tracked by git.
 
-`playwright.config.ts` reads the appropriate file automatically:
+### How environment switching works
+
+The target environment is selected by passing the `ENV` variable at runtime. Playwright reads it at startup — before any test runs — and loads the matching `.env` file:
+
+```
+ENV=staging npx playwright test
+       ↓
+playwright.config.ts reads ENV → loads .env.staging
+       ↓
+BASE_URL is set to the staging URL
+       ↓
+every page.goto('/') in every test resolves against that base URL
+```
+
+The relevant lines in `playwright.config.ts`:
 
 ```ts
-const env = process.env.ENV || 'staging';
+const env = process.env.ENV || 'staging'; // defaults to staging if ENV is not set
 dotenv.config({ path: `.env.${env}` });
+```
+
+To switch environments, simply change the `ENV` value when running the tests — no code changes required:
+
+```bash
+ENV=staging npx playwright test      # runs against staging
+ENV=production npx playwright test   # runs against production
+```
+
+The `npm` scripts in `package.json` handle this for you:
+
+```bash
+npm run test:staging     # sets ENV=staging automatically
+npm run test:production  # sets ENV=production automatically
 ```
 
 ---

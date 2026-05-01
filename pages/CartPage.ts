@@ -42,7 +42,7 @@ export class CartPage {
     this.confirmButton = page.locator('.sweet-alert .confirm');
   }
 
-  async openViaNavMenu(): Promise<void> {
+  async goToCart(): Promise<void> {
     // Set up listener before clicking so the viewcart response is captured
     // even if it arrives before we await the promise.
     const cartLoaded = this.page.waitForResponse('**/viewcart');

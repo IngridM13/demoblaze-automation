@@ -1,7 +1,8 @@
 import { test } from '@playwright/test';
 import { HomePage } from '../pages/HomePage';
-import { ProductPage } from '../pages/ProductPage';
-import { CartPage, PurchaseDetails } from '../pages/CartPage';
+import { ProductDetailsPage } from '../pages/ProductDetailsPage';
+import { CartPage } from '../pages/CartPage';
+import { invalidCreditCardDetails } from '../utils/testData';
 
 test.describe('Checkout Negative - Credit Card Validation', () => {
   // This test documents missing validation: Demoblaze accepts any value in the
@@ -11,26 +12,17 @@ test.describe('Checkout Negative - Credit Card Validation', () => {
     test.fail(true, 'Known bug: Checkout form accepts invalid credit card numbers without validation');
 
     const homePage = new HomePage(page);
-    const productPage = new ProductPage(page);
+    const productDetailsPage = new ProductDetailsPage(page);
     const cartPage = new CartPage(page);
 
-    await homePage.navigate();
+    await homePage.goToHomePage();
     await homePage.selectFirstProduct();
-    await productPage.addToCart();
+    await productDetailsPage.addToCart();
 
-    await cartPage.openViaNavMenu();
+    await cartPage.goToCart();
     await cartPage.placeOrder();
 
-    const invalidPurchaseDetails: PurchaseDetails = {
-      name: `Test User ${Date.now()}`,
-      country: 'United States',
-      city: 'New York',
-      creditCard: '1234',
-      month: '12',
-      year: '2030',
-    };
-
-    await cartPage.fillPurchaseForm(invalidPurchaseDetails);
+    await cartPage.fillPurchaseForm(invalidCreditCardDetails);
     await cartPage.completePurchase();
 
     await cartPage.assertCreditCardValidationError();

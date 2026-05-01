@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { HomePage } from '../pages/HomePage';
-import { AuthPage } from '../pages/AuthPage';
-import { ProductPage } from '../pages/ProductPage';
-import { CartPage, PurchaseDetails } from '../pages/CartPage';
+import { ProductDetailsPage } from '../pages/ProductDetailsPage';
+import { CartPage } from '../pages/CartPage';
+import { validPurchaseDetails } from '../utils/testData';
+import { signUp, logIn } from '../utils/authHelper';
 
 const SAMSUNG = 'Samsung galaxy s6';
 const NOKIA = 'Nokia lumia 1520';
@@ -12,47 +13,32 @@ test.describe('Full User Journey E2E', () => {
     test.setTimeout(60_000);
 
     const homePage = new HomePage(page);
-    const authPage = new AuthPage(page);
-    const productPage = new ProductPage(page);
+    const productDetailsPage = new ProductDetailsPage(page);
     const cartPage = new CartPage(page);
 
     const username = `testuser_${Date.now()}`;
     const password = 'TestPass123!';
 
-    await homePage.navigate();
-
-    await homePage.openSignUp();
-    await authPage.signUp(username, password);
-
-    await homePage.openLogIn();
-    await authPage.logIn(username, password);
-    await homePage.assertLoggedIn(username);
+    await homePage.goToHomePage();
+    await signUp(page, username, password);
+    await logIn(page, username, password);
 
     await homePage.selectProduct(SAMSUNG);
-    await productPage.addToCart();
+    await productDetailsPage.addToCart();
 
-    await homePage.navigate();
+    await homePage.goToHomePage();
     await homePage.selectProduct(NOKIA);
-    await productPage.addToCart();
+    await productDetailsPage.addToCart();
 
-    await cartPage.openViaNavMenu();
+    await cartPage.goToCart();
     const nokiaPrice = await cartPage.getItemPrice(NOKIA);
 
     await cartPage.removeItem(SAMSUNG);
     await cartPage.waitForItemToDisappear(SAMSUNG);
     expect(await cartPage.getTotalPrice()).toBe(nokiaPrice);
 
-    const purchaseDetails: PurchaseDetails = {
-      name: `Test User ${Date.now()}`,
-      country: 'United States',
-      city: 'New York',
-      creditCard: '4111111111111111',
-      month: '12',
-      year: '2025',
-    };
-
     await cartPage.placeOrder();
-    await cartPage.fillPurchaseForm(purchaseDetails);
+    await cartPage.fillPurchaseForm(validPurchaseDetails);
     await cartPage.completePurchase();
 
     await cartPage.assertPurchaseSuccess();

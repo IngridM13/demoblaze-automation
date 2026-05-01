@@ -19,7 +19,7 @@ export class HomePage {
     this.welcomeMessage = page.locator('#nameofuser');
   }
 
-  async navigate(): Promise<void> {
+  async goToHomePage(): Promise<void> {
     await this.page.goto('/');
     await expect(this.productCards.first()).toBeVisible();
   }

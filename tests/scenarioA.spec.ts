@@ -7,7 +7,7 @@ test.describe('Scenario A - Product Catalog', () => {
   test('should extract products from page 1 and page 2 and generate products.txt', async ({ page }) => {
     const homePage = new HomePage(page);
 
-    await homePage.navigate();
+    await homePage.goToHomePage();
     await expect(page).toHaveURL(/demoblaze\.com/);
 
     const page1Products: Product[] = await homePage.getVisibleProducts();

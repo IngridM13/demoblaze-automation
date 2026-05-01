@@ -1,6 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 
-export class ProductPage {
+export class ProductDetailsPage {
   private readonly addToCartButton: Locator;
 
   constructor(private readonly page: Page) {
