@@ -6,11 +6,17 @@ export class HomePage {
 
   private readonly productCards: Locator;
   private readonly nextButton: Locator;
+  private readonly signUpNavLink: Locator;
+  private readonly logInNavLink: Locator;
+  private readonly welcomeMessage: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.productCards = page.locator('#tbodyid .col-lg-4.col-md-6.mb-4');
     this.nextButton = page.locator('#next2');
+    this.signUpNavLink = page.locator('#signin2');
+    this.logInNavLink = page.locator('#login2');
+    this.welcomeMessage = page.locator('#nameofuser');
   }
 
   async navigate(): Promise<void> {
@@ -62,5 +68,20 @@ export class HomePage {
 
   async selectProduct(name: string): Promise<void> {
     await this.page.locator('#tbodyid').getByRole('link', { name, exact: true }).click();
+  }
+
+  async openSignUp(): Promise<void> {
+    await this.signUpNavLink.click();
+    await expect(this.page.locator('#signInModal')).toBeVisible();
+  }
+
+  async openLogIn(): Promise<void> {
+    await this.logInNavLink.click();
+    await expect(this.page.locator('#logInModal')).toBeVisible();
+  }
+
+  async assertLoggedIn(username: string): Promise<void> {
+    await expect(this.welcomeMessage).toHaveText(`Welcome ${username}`);
+    await expect(this.logInNavLink).not.toBeVisible();
   }
 }

@@ -12,6 +12,7 @@ export interface PurchaseDetails {
 export class CartPage {
   private readonly cartNavLink: Locator;
   private readonly cartItems: Locator;
+  private readonly totalPrice: Locator;
   private readonly placeOrderButton: Locator;
   private readonly nameInput: Locator;
   private readonly countryInput: Locator;
@@ -21,11 +22,13 @@ export class CartPage {
   private readonly yearInput: Locator;
   private readonly purchaseButton: Locator;
   private readonly successHeading: Locator;
+  private readonly receiptBody: Locator;
   private readonly confirmButton: Locator;
 
   constructor(private readonly page: Page) {
     this.cartNavLink = page.locator('#cartur');
     this.cartItems = page.locator('#tbodyid tr');
+    this.totalPrice = page.locator('#totalp');
     this.placeOrderButton = page.getByRole('button', { name: 'Place Order' });
     this.nameInput = page.locator('#name');
     this.countryInput = page.locator('#country');
@@ -35,6 +38,7 @@ export class CartPage {
     this.yearInput = page.locator('#year');
     this.purchaseButton = page.locator('#orderModal').getByRole('button', { name: 'Purchase' });
     this.successHeading = page.locator('.sweet-alert h2');
+    this.receiptBody = page.locator('.sweet-alert p.lead');
     this.confirmButton = page.locator('.sweet-alert .confirm');
   }
 
@@ -45,6 +49,33 @@ export class CartPage {
     await this.cartNavLink.click();
     await cartLoaded;
     await expect(this.cartItems.first()).toBeVisible();
+  }
+
+  async getItemPrice(productName: string): Promise<number> {
+    const row = this.page.locator('#tbodyid tr').filter({ hasText: productName });
+    const priceText = await row.locator('td').nth(2).innerText();
+    return parseInt(priceText.trim(), 10);
+  }
+
+  async removeItem(productName: string): Promise<void> {
+    const cartReloaded = this.page.waitForResponse('**/viewcart');
+    const row = this.page.locator('#tbodyid tr').filter({ hasText: productName });
+    await row.getByRole('link', { name: 'Delete' }).click();
+    await cartReloaded;
+  }
+
+  async waitForItemToDisappear(productName: string): Promise<void> {
+    await expect(
+      this.page.locator('#tbodyid tr').filter({ hasText: productName })
+    ).not.toBeAttached();
+  }
+
+  async getTotalPrice(): Promise<number> {
+    // viewcart re-renders the whole table and updates #totalp asynchronously,
+    // so we retry until it contains a numeric value.
+    await expect(this.totalPrice).toHaveText(/\d+/);
+    const text = await this.totalPrice.innerText();
+    return parseInt(text.trim(), 10);
   }
 
   async placeOrder(): Promise<void> {
@@ -67,6 +98,13 @@ export class CartPage {
 
   async assertPurchaseSuccess(): Promise<void> {
     await expect(this.successHeading).toHaveText('Thank you for your purchase!');
+  }
+
+  async getReceiptAmount(): Promise<number> {
+    await expect(this.receiptBody).toBeVisible();
+    const text = await this.receiptBody.innerText();
+    const match = text.match(/Amount:\s*(\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
   }
 
   async closeReceipt(): Promise<void> {
