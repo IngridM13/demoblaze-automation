@@ -107,6 +107,12 @@ export class CartPage {
     return match ? parseInt(match[1], 10) : 0;
   }
 
+  async assertCreditCardValidationError(): Promise<void> {
+    await expect(
+      this.page.locator('#orderModal').getByText('Invalid credit card number')
+    ).toBeVisible();
+  }
+
   async closeReceipt(): Promise<void> {
     await expect(this.confirmButton).toBeVisible();
     await this.confirmButton.click();

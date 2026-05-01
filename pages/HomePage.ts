@@ -70,6 +70,10 @@ export class HomePage {
     await this.page.locator('#tbodyid').getByRole('link', { name, exact: true }).click();
   }
 
+  async selectFirstProduct(): Promise<void> {
+    await this.productCards.first().locator('.card-title a').click();
+  }
+
   async openSignUp(): Promise<void> {
     await this.signUpNavLink.click();
     await expect(this.page.locator('#signInModal')).toBeVisible();

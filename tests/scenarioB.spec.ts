@@ -25,7 +25,7 @@ test.describe('Scenario B - End-to-End Purchase Flow', () => {
       city: 'New York',
       creditCard: '4111111111111111',
       month: '12',
-      year: '2025',
+      year: '2030',
     };
 
     await cartPage.fillPurchaseForm(purchaseDetails);
