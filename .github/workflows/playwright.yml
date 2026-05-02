@@ -1,0 +1,68 @@
+name: Playwright Tests
+
+# Trigger on every push or pull request targeting main
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── Runtime setup ───────────────────────────────────────────────────────
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm   # caches ~/.npm between runs to speed up installs
+
+      # allure-commandline requires Java; ubuntu-latest ships with OpenJDK 11
+      # but we pin the version explicitly to avoid surprises across runner images
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # ── Dependencies ────────────────────────────────────────────────────────
+      # npm ci installs exactly what is in package-lock.json — deterministic
+      - name: Install npm dependencies
+        run: npm ci
+
+      # Only install the browser used by our test suite to keep the step fast
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      # ── Environment ─────────────────────────────────────────────────────────
+      # The example file already contains the correct staging URL for Demoblaze.
+      # No secrets are needed; this step simply makes the file available under
+      # the name that playwright.config.ts expects at runtime.
+      - name: Set up staging environment
+        run: cp .env.staging.example .env.staging
+
+      # ── Test execution ──────────────────────────────────────────────────────
+      # This step is intentionally NOT marked continue-on-error so that the
+      # workflow is marked as failed when tests fail — the correct CI signal.
+      # Report generation and upload use "if: always()" to run regardless.
+      - name: Run Playwright tests
+        run: ENV=staging npx playwright test
+
+      # ── Reporting ───────────────────────────────────────────────────────────
+      - name: Generate Allure report
+        if: always()   # run even when tests fail so the report is always available
+        run: npm run allure:generate
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report/
+          retention-days: 30   # keep artifacts for 30 days, then auto-delete

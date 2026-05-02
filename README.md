@@ -33,6 +33,9 @@ ui-automation/
 │   ├── fileHelper.ts      # Writes products.txt to disk
 │   ├── testData.ts        # Centralized purchase data sets
 │   └── types.ts           # Shared TypeScript interfaces
+├── .github/
+│   └── workflows/
+│       └── playwright.yml   # CI/CD pipeline
 ├── playwright.config.ts
 └── tsconfig.json
 ```
@@ -217,6 +220,31 @@ npm run allure:clean      # delete allure-results/ and allure-report/
 npm run allure:generate   # process allure-results/ → allure-report/
 npm run allure:open       # serve and open allure-report/
 ```
+
+---
+
+## CI/CD
+
+The pipeline is defined in `.github/workflows/playwright.yml` and runs automatically on every push or pull request to `main`.
+
+### What it does
+
+| Step | Details |
+|---|---|
+| Install dependencies | `npm ci` — deterministic install from `package-lock.json` |
+| Install browsers | Chromium only, with system dependencies (`--with-deps`) |
+| Set up environment | Copies `.env.staging.example` → `.env.staging` |
+| Run tests | Full suite against staging; job fails if any test fails |
+| Generate Allure report | Always runs — even when tests fail |
+| Upload artifact | `allure-report/` is uploaded and kept for 30 days |
+
+### Downloading the Allure report
+
+After a workflow run completes, open the run summary on GitHub and scroll to the **Artifacts** section at the bottom. Download `allure-report`, unzip it, and open `index.html` in your browser.
+
+### Parallel execution
+
+In CI the suite runs with `fullyParallel: true` and `workers: 2`, matching the 2-core GitHub Actions runner. Locally, Playwright uses its own default (half the available CPUs).
 
 ---
 
