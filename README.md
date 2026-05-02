@@ -165,6 +165,44 @@ npm run test:report
 
 ---
 
+## Parallel Execution
+
+### Strategy
+
+The suite runs with `fullyParallel: true`, which means every individual test is eligible to run concurrently — not just files, but also tests within the same file. The number of workers is environment-aware:
+
+```ts
+fullyParallel: true,
+workers: process.env.CI ? 2 : undefined,
+```
+
+- **Locally** — Playwright uses its default (half the available CPUs), so on a 4-core machine you get 2 workers, on an 8-core machine you get 4.
+- **CI** — pinned to 2 workers to match the GitHub Actions 2-core runner exactly and avoid oversubscription.
+
+### Data isolation
+
+Parallel tests can interfere with each other when they share state — typically a shared user account or a shared cart. This suite avoids that entirely:
+
+- Every test that requires authentication creates a **unique user** at runtime using a `Date.now()` suffix (`testuser_1234567890`, `fixture_user_1234567890`).
+- Each user has their own independent cart on Demoblaze's backend.
+- No test reads or writes data that another concurrently running test depends on.
+- Scenario B adds an `afterEach` hook that clears the cart after each run. Because the fixture creates a fresh user per test, the cart is already empty at the start — but the hook acts as an explicit guarantee, ensuring no leftover items if the test is extended or reused in the future.
+
+No additional isolation mechanism (database transactions, test-scoped accounts, etc.) is needed because the uniqueness guarantee is built into the test data itself.
+
+### Execution time: before vs. after
+
+Measured locally on the full 4-test suite:
+
+| Mode | Workers | Wall-clock time |
+|---|---|---|
+| Sequential (baseline) | 1 | ~47s |
+| Parallel | 4 | ~17s |
+
+**~64% reduction** in total execution time (~2.8× faster). The gain comes almost entirely from overlapping the three independent E2E flows (Scenario B, Full User Journey, Checkout Negative) that previously had to wait for each other.
+
+---
+
 ## Allure Report
 
 The framework integrates [Allure](https://allurereport.org/) for rich, interactive test reports with step-level detail, screenshots on failure, and trace attachments.
@@ -244,7 +282,7 @@ After a workflow run completes, open the run summary on GitHub and scroll to the
 
 ### Parallel execution
 
-In CI the suite runs with `fullyParallel: true` and `workers: 2`, matching the 2-core GitHub Actions runner. Locally, Playwright uses its own default (half the available CPUs).
+The pipeline uses the same parallel configuration described in the [Parallel Execution](#parallel-execution) section above, with `workers: 2` to match the 2-core GitHub Actions runner.
 
 ---
 
