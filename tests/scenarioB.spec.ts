@@ -7,6 +7,10 @@ import { validPurchaseDetails } from '../utils/testData';
 const TARGET_PRODUCT = 'Samsung galaxy s6';
 
 test.describe('Scenario B - End-to-End Purchase Flow', () => {
+  test.afterEach(async ({ authenticatedPage }) => {
+    await new CartPage(authenticatedPage).clearCart();
+  });
+
   test('should complete a full purchase for Samsung galaxy s6', async ({ authenticatedPage }) => {
     const homePage = new HomePage(authenticatedPage);
     const productPage = new ProductDetailsPage(authenticatedPage);

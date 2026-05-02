@@ -107,6 +107,19 @@ export class CartPage {
     return match ? parseInt(match[1], 10) : 0;
   }
 
+  async clearCart(): Promise<void> {
+    const cartLoaded = this.page.waitForResponse('**/viewcart');
+    await this.page.goto('/cart.html');
+    await cartLoaded;
+
+    const deleteLinks = this.page.locator('#tbodyid tr').getByRole('link', { name: 'Delete' });
+    while ((await deleteLinks.count()) > 0) {
+      const cartReloaded = this.page.waitForResponse('**/viewcart');
+      await deleteLinks.first().click();
+      await cartReloaded;
+    }
+  }
+
   async assertCreditCardValidationError(): Promise<void> {
     await expect(
       this.page.locator('#orderModal').getByText('Invalid credit card number')
