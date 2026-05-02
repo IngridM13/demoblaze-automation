@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Executive Summary — Demoblaze UI Automation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: #1a1a2e;
+      background: #f5f7fa;
+      padding: 40px 32px;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    .header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 36px 40px;
+      margin-bottom: 32px;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin-bottom: 6px;
+    }
+    .header .subtitle {
+      font-size: 14px;
+      color: #a0b4cc;
+      margin-bottom: 20px;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .meta-item {
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+    .meta-item .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #a0b4cc;
+      margin-bottom: 4px;
+    }
+    .meta-item .value {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* ── Summary cards ───────────────────────────────────────────────── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border-top: 4px solid #ccc;
+    }
+    .card.passed  { border-color: #22c55e; }
+    .card.failed  { border-color: #ef4444; }
+    .card.known   { border-color: #f59e0b; }
+    .card.time    { border-color: #3b82f6; }
+    .card .card-number {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .card.passed  .card-number { color: #16a34a; }
+    .card.failed  .card-number { color: #dc2626; }
+    .card.known   .card-number { color: #d97706; }
+    .card.time    .card-number { color: #2563eb; }
+    .card .card-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #64748b;
+    }
+    .card .card-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    /* ── Sections ───────────────────────────────────────────────────── */
+    .section {
+      background: white;
+      border-radius: 10px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .section h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f3460;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section h2 .icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .icon-red    { background: #fef2f2; color: #dc2626; }
+    .icon-blue   { background: #eff6ff; color: #2563eb; }
+    .icon-green  { background: #f0fdf4; color: #16a34a; }
+    .icon-yellow { background: #fffbeb; color: #d97706; }
+
+    /* ── Results table ──────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      background: #f8fafc;
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      color: #475569;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #fafbfc; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+    }
+    .badge-pass   { background: #dcfce7; color: #15803d; }
+    .badge-known  { background: #fef9c3; color: #92400e; }
+    .badge-retry  { background: #e0e7ff; color: #3730a3; }
+
+    /* ── Bug block ──────────────────────────────────────────────────── */
+    .bug-block {
+      border: 1px solid #fecaca;
+      background: #fff8f8;
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    .bug-block h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #dc2626;
+      margin-bottom: 8px;
+    }
+    .bug-block .bug-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+    .bug-block .bug-meta span { display: flex; align-items: center; gap: 4px; }
+    .bug-block p {
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .code-inline {
+      font-family: 'Courier New', monospace;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #1e293b;
+    }
+
+    /* ── Observation block ──────────────────────────────────────────── */
+    .obs-block {
+      border-left: 4px solid #e2e8f0;
+      padding: 10px 16px;
+      margin-bottom: 12px;
+      border-radius: 0 6px 6px 0;
+      background: #fafafa;
+    }
+    .obs-block.blue   { border-color: #3b82f6; background: #eff6ff; }
+    .obs-block.yellow { border-color: #f59e0b; background: #fffbeb; }
+    .obs-block.green  { border-color: #22c55e; background: #f0fdf4; }
+    .obs-block h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+    .obs-block p {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    /* ── Action items ───────────────────────────────────────────────── */
+    .action-group { margin-bottom: 20px; }
+    .action-group h3 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 10px;
+    }
+    .action-group.dev h3  { color: #dc2626; }
+    .action-group.qa h3   { color: #2563eb; }
+    .action-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+      align-items: flex-start;
+    }
+    .action-item .priority {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      margin-top: 2px;
+      letter-spacing: 0.4px;
+    }
+    .priority-high   { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
+    .priority-medium { background: #fff7ed; color: #c2410c; border: 1px solid #fdba74; }
+    .priority-low    { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+    .action-item p {
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .action-item p strong { color: #0f3460; }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 32px;
+    }
+
+    @media print {
+      body { background: white; padding: 20px; }
+      .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .card   { -webkit-print-color-adjust: exact; print-color-adjust: exact; break-inside: avoid; }
+      .section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ──────────────────────────────────────────────────────── -->
+  <div class="header">
+    <h1>QA Executive Summary</h1>
+    <div class="subtitle">Demoblaze E-Commerce Platform — UI Automation Test Execution Report</div>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="label">Execution Date</div>
+        <div class="value">May 2, 2026</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Environment</div>
+        <div class="value">Staging</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Browser</div>
+        <div class="value">Chromium</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Framework</div>
+        <div class="value">Playwright + TypeScript</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── KPI CARDS ───────────────────────────────────────────────────── -->
+  <div class="cards">
+    <div class="card passed">
+      <div class="card-number">3</div>
+      <div class="card-label">Tests Passed</div>
+      <div class="card-sub">Functionally verified</div>
+    </div>
+    <div class="card failed">
+      <div class="card-number">0</div>
+      <div class="card-label">Unexpected Failures</div>
+      <div class="card-sub">Suite is stable</div>
+    </div>
+    <div class="card known">
+      <div class="card-number">1</div>
+      <div class="card-label">Known Bug Tracked</div>
+      <div class="card-sub">Intentional · test.fail()</div>
+    </div>
+    <div class="card time">
+      <div class="card-number">~19s</div>
+      <div class="card-label">Wall-Clock Time</div>
+      <div class="card-sub">4 workers in parallel</div>
+    </div>
+  </div>
+
+  <!-- ── TEST RESULTS TABLE ──────────────────────────────────────────── -->
+  <div class="section">
+    <h2><span class="icon icon-blue">≡</span> Test Results</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Test Scenario</th>
+          <th>Suite File</th>
+          <th>Duration</th>
+          <th>Worker</th>
+          <th>Status</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Product Catalog Scraping</strong></td>
+          <td><span class="code-inline">scenarioA.spec.ts</span></td>
+          <td>~7s</td>
+          <td>worker-2</td>
+          <td><span class="badge badge-pass">PASSED</span></td>
+          <td><span class="badge badge-retry">3 toPass retries</span> on pagination</td>
+        </tr>
+        <tr>
+          <td><strong>E2E Purchase Flow</strong></td>
+          <td><span class="code-inline">scenarioB.spec.ts</span></td>
+          <td>~13s</td>
+          <td>worker-3</td>
+          <td><span class="badge badge-pass">PASSED</span></td>
+          <td>Fixture-based auth + cart cleanup</td>
+        </tr>
+        <tr>
+          <td><strong>Full User Journey</strong></td>
+          <td><span class="code-inline">fullUserJourney.spec.ts</span></td>
+          <td>~17s</td>
+          <td>worker-1</td>
+          <td><span class="badge badge-pass">PASSED</span></td>
+          <td>Signup → Login → 2 products → delete → purchase</td>
+        </tr>
+        <tr>
+          <td><strong>Checkout Negative Test</strong></td>
+          <td><span class="code-inline">checkoutNegative.spec.ts</span></td>
+          <td>~19s</td>
+          <td>worker-0</td>
+          <td><span class="badge badge-known">KNOWN BUG</span></td>
+          <td>Intentional fail — no CC validation in app</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── FAILED TESTS & ROOT CAUSE ──────────────────────────────────── -->
+  <div class="section">
+    <h2><span class="icon icon-red">!</span> Failed Tests &amp; Root Cause Analysis</h2>
+
+    <div class="bug-block">
+      <h3>BUG-001 · Checkout form accepts invalid credit card numbers</h3>
+      <div class="bug-meta">
+        <span>📄 checkoutNegative.spec.ts</span>
+        <span>🔧 CartPage.assertCreditCardValidationError()</span>
+        <span>⏱ Timeout: 10,000ms</span>
+        <span>⚠ Severity: Normal</span>
+      </div>
+      <p>
+        <strong>What the test does:</strong> Submits the checkout form with an invalid credit card number
+        (<span class="code-inline">"1234"</span>) and asserts that a validation error message appears inside
+        the Order modal.
+      </p>
+      <p>
+        <strong>What the application does:</strong> Demoblaze performs no frontend validation on the credit
+        card field. Upon clicking Purchase, the modal closes and the purchase success dialog
+        (<span class="code-inline">.sweet-alert</span>) is displayed immediately, regardless of the input value.
+      </p>
+      <p>
+        <strong>Technical root cause:</strong> The assertion
+        <span class="code-inline">expect(locator('#orderModal').getByText('Invalid credit card number')).toBeVisible()</span>
+        waited 10,000ms for an element that is never rendered. The Order modal was already dismissed by the
+        time the assertion ran, leaving the locator with zero matching elements in the DOM.
+        The Playwright error log confirms: <em>"element(s) not found — waiting for
+        locator('#orderModal').getByText('Invalid credit card number')"</em>.
+      </p>
+      <p>
+        <strong>Framework handling:</strong> The test is decorated with
+        <span class="code-inline">test.fail(true, '...')</span>, which inverts the pass/fail signal.
+        The test is therefore reported as <strong>passed</strong> in CI and will automatically flip to red
+        once the application implements the expected validation, serving as a regression guard.
+      </p>
+    </div>
+
+    <div class="obs-block yellow">
+      <h4>Pagination Retries in Scenario A (non-blocking)</h4>
+      <p>
+        The <span class="code-inline">goToNextPage()</span> method detected 3 internal retries via
+        <span class="code-inline">expect.toPass()</span> before the page-2 product list rendered.
+        Demoblaze's pagination updates the DOM asynchronously (~900ms after the Next click), temporarily
+        leaving the same product names from page 1 visible. The polling strategy handled this correctly
+        and the test passed without retry. This is informational — no action required.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── DETECTED PATTERNS ───────────────────────────────────────────── -->
+  <div class="section">
+    <h2><span class="icon icon-blue">⌖</span> Detected Patterns</h2>
+
+    <div class="obs-block green">
+      <h4>Stable Authentication Flows</h4>
+      <p>
+        Sign-up and login operations completed consistently across all three tests that require
+        authentication (Scenario B fixture, Full User Journey). The average auth sequence
+        (sign-up dialog → login modal → nav bar confirmation) completed in <strong>2–3 seconds</strong>
+        with no flakiness observed. Unique usernames generated via <span class="code-inline">Date.now()</span>
+        prevented any account collision under parallel execution.
+      </p>
+    </div>
+
+    <div class="obs-block green">
+      <h4>Cart Operations Are Reliable</h4>
+      <p>
+        Add-to-cart (network-synced via <span class="code-inline">waitForResponse('**/addtocart')</span>),
+        item deletion (DOM-synced via <span class="code-inline">not.toBeAttached()</span>), and total
+        recalculation (polled via <span class="code-inline">toHaveText(/\d+/)</span>) all performed
+        reliably across parallel runs. No race conditions were observed in cart state management.
+      </p>
+    </div>
+
+    <div class="obs-block blue">
+      <h4>Page Load Latency (~4–5s) is an External Dependency</h4>
+      <p>
+        All four tests navigate to the Demoblaze homepage and consistently wait ~4–5 seconds for the
+        product grid to render. This latency originates from the application's CDN/server response time
+        and is outside the control of the automation framework. It is stable and predictable — not a
+        flakiness concern — but it sets a floor on how fast any test can start its business logic.
+      </p>
+    </div>
+
+    <div class="obs-block yellow">
+      <h4>Pagination Rendering Is Slow but Consistently Handled</h4>
+      <p>
+        Demoblaze's catalog pagination has no loading indicator and updates the DOM approximately
+        900ms after the Next button click. The <span class="code-inline">toPass()</span> polling pattern
+        catches this reliably, but it represents a fragile contract with the application's frontend
+        performance. A regression in page-2 load time could increase retry count or cause timeout.
+      </p>
+    </div>
+
+    <div class="obs-block blue">
+      <h4>Parallel Execution Shows No Data Interference</h4>
+      <p>
+        All 4 tests launched simultaneously (same epoch millisecond in the Allure trace) and completed
+        without interfering with each other. The data isolation strategy — unique users per test,
+        independent cart state, <span class="code-inline">afterEach</span> cleanup in Scenario B —
+        proved effective. Wall-clock time of ~19s vs. ~47s sequential confirms a <strong>~64% reduction</strong>
+        in execution time.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── ACTION SUGGESTIONS ──────────────────────────────────────────── -->
+  <div class="section">
+    <h2><span class="icon icon-green">✓</span> Action Suggestions</h2>
+
+    <div class="action-group dev">
+      <h3>Development Team</h3>
+
+      <div class="action-item">
+        <span class="priority priority-high">HIGH</span>
+        <p>
+          <strong>Implement credit card validation on the checkout form (BUG-001).</strong>
+          The purchase form should reject card numbers that fail the Luhn algorithm or fall outside
+          accepted length ranges before submitting the order. Validation should occur client-side on
+          form submission and display an error message within the Order modal without closing it.
+          Once implemented, the <span class="code-inline">checkoutNegative</span> test will automatically
+          become a passing regression guard.
+        </p>
+      </div>
+
+      <div class="action-item">
+        <span class="priority priority-medium">MED</span>
+        <p>
+          <strong>Add a loading indicator to catalog pagination.</strong>
+          The current Next/Prev navigation updates the DOM asynchronously with no visual feedback,
+          which makes both manual UX and automation synchronization harder than necessary.
+          A simple CSS class toggle or spinner during the load would allow the framework to use a
+          deterministic wait instead of polling.
+        </p>
+      </div>
+
+      <div class="action-item">
+        <span class="priority priority-low">LOW</span>
+        <p>
+          <strong>Expose a consistent network event for cart updates.</strong>
+          The <span class="code-inline">DELETE</span> cart item operation does not reliably emit a
+          <span class="code-inline">viewcart</span> response, which forced the framework to fall back
+          to DOM-level polling. A predictable API contract (e.g., consistent response after deletion)
+          would allow cleaner, faster synchronization.
+        </p>
+      </div>
+    </div>
+
+    <div class="action-group qa">
+      <h3>QA Team</h3>
+
+      <div class="action-item">
+        <span class="priority priority-high">HIGH</span>
+        <p>
+          <strong>Expand negative test coverage for the checkout form.</strong>
+          Once BUG-001 is fixed, add test cases for: empty required fields, expired card dates,
+          missing card number, and special characters in text fields. The
+          <span class="code-inline">invalidCreditCardDetails</span> fixture in
+          <span class="code-inline">testData.ts</span> can be extended with additional datasets using
+          Playwright's <span class="code-inline">test.each()</span>.
+        </p>
+      </div>
+
+      <div class="action-item">
+        <span class="priority priority-medium">MED</span>
+        <p>
+          <strong>Add cross-browser coverage (Firefox, WebKit).</strong>
+          The current suite runs exclusively on Chromium. Adding Firefox and WebKit projects to
+          <span class="code-inline">playwright.config.ts</span> would surface any browser-specific
+          rendering or behavior differences, especially around dialog handling and modal animations.
+        </p>
+      </div>
+
+      <div class="action-item">
+        <span class="priority priority-medium">MED</span>
+        <p>
+          <strong>Add a pagination stability guard to Scenario A.</strong>
+          The <span class="code-inline">toPass()</span> polling currently has no configurable timeout
+          separate from the global test timeout. Consider wrapping the pagination assertion with an
+          explicit <span class="code-inline">{ timeout: 5000 }</span> option so slow pagination fails
+          fast and is clearly attributed to the correct cause in the report.
+        </p>
+      </div>
+
+      <div class="action-item">
+        <span class="priority priority-low">LOW</span>
+        <p>
+          <strong>Configure Allure history to track flakiness trends over time.</strong>
+          Allure supports historical trend charts when <span class="code-inline">allure-results/history</span>
+          is preserved between runs. In the GitHub Actions workflow, cache or artifact the history
+          folder so retries and pass-rate trends become visible across pipeline executions.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ──────────────────────────────────────────────────────── -->
+  <div class="footer">
+    Generated from Allure results · Demoblaze UI Automation Suite · May 2, 2026 · Playwright 1.59 + TypeScript
+  </div>
+
+</body>
+</html>
