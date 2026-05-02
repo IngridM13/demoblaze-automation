@@ -8,13 +8,20 @@
     "test:production": "ENV=production npx playwright test",
     "test:staging:headed": "ENV=staging npx playwright test --headed",
     "test:production:headed": "ENV=production npx playwright test --headed",
-    "test:report": "npx playwright show-report"
+    "test:report": "npx playwright show-report",
+    "allure:clean": "rm -rf allure-results allure-report",
+    "allure:generate": "npx allure generate allure-results --clean -o allure-report",
+    "allure:open": "npx allure open allure-report",
+    "test:allure:staging": "npm run allure:clean && ENV=staging npx playwright test; npm run allure:generate",
+    "test:allure:production": "npm run allure:clean && ENV=production npx playwright test; npm run allure:generate"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.59.1",
+    "allure-commandline": "^2.38.1",
+    "allure-playwright": "^3.7.1",
     "dotenv": "^17.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"

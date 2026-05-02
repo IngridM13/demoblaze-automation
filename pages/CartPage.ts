@@ -58,10 +58,8 @@ export class CartPage {
   }
 
   async removeItem(productName: string): Promise<void> {
-    const cartReloaded = this.page.waitForResponse('**/viewcart');
     const row = this.page.locator('#tbodyid tr').filter({ hasText: productName });
     await row.getByRole('link', { name: 'Delete' }).click();
-    await cartReloaded;
   }
 
   async waitForItemToDisappear(productName: string): Promise<void> {
@@ -114,9 +112,9 @@ export class CartPage {
 
     const deleteLinks = this.page.locator('#tbodyid tr').getByRole('link', { name: 'Delete' });
     while ((await deleteLinks.count()) > 0) {
-      const cartReloaded = this.page.waitForResponse('**/viewcart');
+      const firstRow = this.cartItems.first();
       await deleteLinks.first().click();
-      await cartReloaded;
+      await expect(firstRow).not.toBeAttached();
     }
   }
 

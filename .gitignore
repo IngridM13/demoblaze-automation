@@ -6,3 +6,5 @@ playwright-report/
 .env.staging
 .env.production
 products.txt
+allure-results/
+allure-report/

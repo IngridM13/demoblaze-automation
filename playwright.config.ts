@@ -13,13 +13,17 @@ export default defineConfig({
   },
   fullyParallel: false,
   retries: 1,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [
+    ['list'],
+    ['html', { open: 'never' }],
+    ['allure-playwright'],
+  ],
 
   use: {
     baseURL: process.env.BASE_URL,
     headless: true,
     screenshot: 'only-on-failure',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
   },
 
   projects: [

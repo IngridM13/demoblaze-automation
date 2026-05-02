@@ -18,17 +18,20 @@ End-to-end test automation framework for [Demoblaze](https://www.demoblaze.com),
 ```
 ui-automation/
 ├── pages/
-│   ├── AuthPage.ts        # Sign up and Log in modals
-│   ├── CartPage.ts        # Cart table, Place Order modal, receipt
-│   ├── HomePage.ts        # Product catalog, navigation bar
-│   └── ProductPage.ts     # Product detail, Add to cart
+│   ├── AuthPage.ts              # Sign up and Log in modals
+│   ├── CartPage.ts              # Cart table, Place Order modal, receipt
+│   ├── HomePage.ts              # Product catalog, navigation bar
+│   └── ProductDetailsPage.ts   # Product detail, Add to cart
 ├── tests/
-│   ├── scenarioA.spec.ts           # Web scraping — product catalog
-│   ├── scenarioB.spec.ts           # E2E purchase flow
-│   ├── fullUserJourney.spec.ts     # Complete user journey (signup → purchase)
-│   └── checkoutNegative.spec.ts    # Negative test — credit card validation
+│   ├── fixtures.ts                     # Custom authenticatedPage fixture
+│   ├── scenarioA.spec.ts               # Web scraping — product catalog
+│   ├── scenarioB.spec.ts               # E2E purchase flow
+│   ├── fullUserJourney.spec.ts         # Complete user journey (signup → purchase)
+│   └── checkoutNegative.spec.ts        # Negative test — credit card validation
 ├── utils/
+│   ├── authHelper.ts      # signUp() and logIn() helpers
 │   ├── fileHelper.ts      # Writes products.txt to disk
+│   ├── testData.ts        # Centralized purchase data sets
 │   └── types.ts           # Shared TypeScript interfaces
 ├── playwright.config.ts
 └── tsconfig.json
@@ -42,6 +45,7 @@ ui-automation/
 
 - **Node.js** v18 or higher — [nodejs.org](https://nodejs.org)
 - **npm** v9 or higher (bundled with Node.js)
+- **Java** v11 or higher — required by `allure-commandline` to generate and serve Allure reports — [java.com](https://www.java.com)
 
 ---
 
@@ -154,6 +158,64 @@ After any run, open the interactive HTML report:
 
 ```bash
 npm run test:report
+```
+
+---
+
+## Allure Report
+
+The framework integrates [Allure](https://allurereport.org/) for rich, interactive test reports with step-level detail, screenshots on failure, and trace attachments.
+
+### Dependencies
+
+`allure-playwright` (the Playwright adapter) and `allure-commandline` (the CLI that generates and opens the report) are included in `devDependencies`, so `npm install` during setup covers this automatically.
+
+### How it works
+
+`playwright.config.ts` registers the Allure reporter alongside the built-in ones:
+
+```ts
+reporter: [
+  ['list'],
+  ['html', { open: 'never' }],
+  ['allure-playwright'],
+],
+```
+
+Every test run writes raw result data to the `allure-results/` directory. The `allure generate` command then processes that data into a self-contained HTML report in `allure-report/`.
+
+Both directories are listed in `.gitignore` and are never committed.
+
+### Generating the report
+
+The recommended way is to use the combined scripts, which clean previous results, run the tests, and generate the report in one step:
+
+```bash
+npm run test:allure:staging     # run against staging + generate report
+npm run test:allure:production  # run against production + generate report
+```
+
+### Viewing the report
+
+```bash
+npm run allure:open
+```
+
+This launches a local server and opens the report in your browser. The report includes:
+
+- Pass / fail status per test
+- Step-by-step execution timeline
+- Screenshots captured on failure
+- Playwright traces retained on failure
+
+### Running the steps individually
+
+If you need finer control — for example, to regenerate the report from an existing `allure-results/` without re-running the tests:
+
+```bash
+npm run allure:clean      # delete allure-results/ and allure-report/
+npm run allure:generate   # process allure-results/ → allure-report/
+npm run allure:open       # serve and open allure-report/
 ```
 
 ---
