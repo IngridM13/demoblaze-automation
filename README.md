@@ -168,6 +168,16 @@ Navigates the product catalog, paginates to page 2, and extracts the **name, pri
 
 Selects a product, adds it to the cart, and completes the full checkout with dynamic test data, validating the success receipt.
 
+This scenario uses a custom **Playwright fixture** (`authenticatedPage`) to showcase how fixtures provide dependency injection for test infrastructure. The fixture handles user creation and login before the test body runs, so the test receives an already-authenticated page and focuses exclusively on the purchase flow. This pattern avoids repeating auth setup across tests and keeps each test focused on a single responsibility.
+
+```
+fixture setup (transparent to the test)
+  → create user → sign up → log in
+       ↓
+test body receives authenticated page
+  → select product → add to cart → checkout
+```
+
 ### Full User Journey (`fullUserJourney.spec.ts`)
 
 The most comprehensive scenario, covering the complete lifecycle of a new user:
@@ -177,6 +187,8 @@ The most comprehensive scenario, covering the complete lifecycle of a new user:
 3. Add **two products** to the cart
 4. **Delete one item** and assert the total updates correctly
 5. **Complete the purchase** and validate the receipt amount matches the expected price
+
+This scenario intentionally does **not** use the `authenticatedPage` fixture. The signup and login steps are part of the scenario under test — verifying that a user can register and immediately authenticate with the credentials they just created. Abstracting auth into a fixture here would hide behavior that this test is explicitly meant to validate.
 
 ### Negative Testing — Checkout Validation (`checkoutNegative.spec.ts`)
 
