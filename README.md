@@ -77,8 +77,8 @@ The project supports **staging** and **production** environments. Each has its o
 **Step 1 — Create your environment files from the provided templates:**
 
 ```bash
-cp .env.staging.example .env.staging
-cp .env.production.example .env.production
+cp env.staging.example .env.staging
+cp env.production.example .env.production
 ```
 
 **Step 2 — Fill in the values for each file:**
@@ -95,7 +95,7 @@ BASE_URL=https://www.demoblaze.com
 ENV=production
 ```
 
-> **Note:** `.env.staging` and `.env.production` are listed in `.gitignore` and will never be committed. Only the `.example` template files are tracked by git.
+> **Note:** `.env.staging` and `.env.production` are listed in `.gitignore` and will never be committed. Only the `env.*.example` template files are tracked by git.
 
 ### How environment switching works
 
@@ -271,7 +271,7 @@ The pipeline is defined in `.github/workflows/playwright.yml` and runs automatic
 |---|---|
 | Install dependencies | `npm ci` — deterministic install from `package-lock.json` |
 | Install browsers | Chromium only, with system dependencies (`--with-deps`) |
-| Set up environment | Copies `.env.staging.example` → `.env.staging` |
+| Set up environment | Copies `env.staging.example` → `.env.staging` |
 | Run tests | Full suite against staging; job fails if any test fails |
 | Generate Allure report | Always runs — even when tests fail |
 | Upload artifact | `allure-report/` is uploaded and kept for 30 days |

@@ -45,7 +45,7 @@ jobs:
       # No secrets are needed; this step simply makes the file available under
       # the name that playwright.config.ts expects at runtime.
       - name: Set up staging environment
-        run: cp .env.staging.example .env.staging
+        run: cp env.staging.example .env.staging
 
       # ── Test execution ──────────────────────────────────────────────────────
       # This step is intentionally NOT marked continue-on-error so that the
